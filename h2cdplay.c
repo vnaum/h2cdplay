@@ -6,6 +6,21 @@
 #include <unistd.h>
 #include "bass.h"
 
+#define MAXTRACK 50
+HANDLE evt[MAXTRACK];
+
+void
+create_events ()
+{
+  char evtnamebuf[1024];
+  int i;
+  for (i = 0; i < MAXTRACK; i++)
+    {
+      sprintf (evtnamebuf, "h2cd_play_track#%02d", i);
+      evt[i] = CreateEvent (NULL, FALSE, FALSE, evtnamebuf);
+    }
+}
+
 // display error messages
 void
 Error (const char *text)
@@ -35,11 +50,20 @@ main (int argc, char **argv)
   // setup output - default device
   if (!BASS_Init (-1, 44100, 0, 0, NULL))
     Error ("Can't initialize device");
+  create_events();
 
+  printf ("Waiting for events...\n");
   while (1)
     {
-      printf ("h2play> ");
-      scanf ("%d", &trknum);
+      DWORD dwWaitResult = WaitForMultipleObjects(
+        MAXTRACK,      // number of handles in array
+        evt,           // array of thread handles
+        FALSE,         // wait until all are signaled
+        INFINITE);
+
+      printf ("Event fired: %ld\n", dwWaitResult);
+      trknum = dwWaitResult;
+      
       if (trknum == 0)
 	{
 	  printf ("Terminating\n");

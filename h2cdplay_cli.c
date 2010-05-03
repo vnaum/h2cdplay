@@ -39,13 +39,14 @@ main (int argc, char **argv)
     {
       printf ("h2play> ");
       scanf ("%d", &trknum);
-      if (trknum == 0)
-	{
-	  printf ("Terminating\n");
-	  return 0;
-	}
 
       printf ("setting %d\n", trknum);
       fire_event (trknum);
+      
+      if (trknum == 0)
+        {
+          printf ("Terminating\n");
+          return 0;
+        }
     }
 }
