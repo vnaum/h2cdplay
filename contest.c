@@ -20,7 +20,6 @@ int
 main (int argc, char **argv)
 {
   DWORD chan, act, time, level;
-  BOOL ismod;
   QWORD pos;
   int a;
 
@@ -45,43 +44,11 @@ main (int argc, char **argv)
     Error ("Can't initialize device");
 
   // try streaming the file/url
-  if ((chan = BASS_StreamCreateFile (FALSE, argv[1], 0, 0, BASS_SAMPLE_LOOP))
-      || (chan = BASS_StreamCreateURL (argv[1], 0, BASS_SAMPLE_LOOP, 0, 0)))
+  chan = BASS_StreamCreateFile (FALSE, argv[1], 0, 0, BASS_SAMPLE_LOOP);
+  if (chan)
     {
       pos = BASS_ChannelGetLength (chan, BASS_POS_BYTE);
-      if (BASS_StreamGetFilePosition (chan, BASS_FILEPOS_DOWNLOAD) != -1)
-	{
-	  // streaming from the internet
-	  if (pos != -1)
-	    printf ("streaming internet file [%I64u bytes]", pos);
-	  else
-	    printf ("streaming internet file");
-	}
-      else
-	printf ("streaming file [%I64u bytes]", pos);
-      ismod = FALSE;
-    }
-  else
-    {
-      // try loading the MOD (with looping, sensitive ramping, and calculate the duration)
-      if (!
-	  (chan =
-	   BASS_MusicLoad (FALSE, argv[1], 0, 0,
-			   BASS_SAMPLE_LOOP | BASS_MUSIC_RAMPS |
-			   BASS_MUSIC_PRESCAN, 0)))
-	// not a MOD either
-	Error ("Can't play the file");
-      {				// count channels
-	float dummy;
-	for (a = 0;
-	     BASS_ChannelGetAttribute (chan, BASS_ATTRIB_MUSIC_VOL_CHAN + a,
-				       &dummy); a++);
-      }
-      printf ("playing MOD music \"%s\" [%u chans, %u orders]",
-	      BASS_ChannelGetTags (chan, BASS_TAG_MUSIC_NAME), a,
-	      BASS_ChannelGetLength (chan, BASS_POS_MUSIC_ORDER));
-      pos = BASS_ChannelGetLength (chan, BASS_POS_BYTE);
-      ismod = TRUE;
+      printf ("streaming file [%I64u bytes]", pos);
     }
 
   // display the time length
