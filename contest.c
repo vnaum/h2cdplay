@@ -52,7 +52,7 @@ main (int argc, char **argv)
       if (BASS_ChannelIsActive (chan))
 	{
 	  // fadeout and stop required
-	  printf ("Fading out, stopping...\n");
+	  printf ("Stopping playback...\n");
 	  BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
 	  while (BASS_ChannelIsSliding (chan, 0))
 	    usleep (100);
@@ -66,6 +66,17 @@ main (int argc, char **argv)
         printf ("Playing track %s\n", trkbuf);
 
         chan = BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
+        if (!chan)
+        {
+          printf ("Error while opening\n");
+          continue;
+        }
+
+        // set some flags:
+        // free stream once playback ends
+        BASS_ChannelFlags(chan, BASS_STREAM_AUTOFREE,
+            BASS_STREAM_AUTOFREE|BASS_SAMPLE_LOOP);
+        
         BASS_ChannelPlay (chan, FALSE);
       }
     }
