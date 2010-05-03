@@ -3,8 +3,8 @@
         Copyright (c) 1999-2008 Un4seen Developments Ltd.
 */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "bass.h"
 
 // display error messages
@@ -19,10 +19,8 @@ Error (const char *text)
 int
 main (int argc, char **argv)
 {
-  DWORD chan, act, time, level;
+  DWORD chan = 0;
   int trknum = 0;
-  QWORD pos;
-  int a;
   char *trkpath = "W:/h2gold_mp3";
   char trkbuf[1024];
 
@@ -32,7 +30,7 @@ main (int argc, char **argv)
   if (HIWORD (BASS_GetVersion ()) != BASSVERSION)
     {
       printf ("An incorrect version of BASS was loaded");
-      return;
+      return 1;
     }
 
   // setup output - default device
@@ -40,19 +38,28 @@ main (int argc, char **argv)
     Error ("Can't initialize device");
 
   while (1)
-  {
-    printf("h2play> ");
-    scanf("%d", &trknum);
-    if (trknum == 0)
     {
-      printf ("Terminating\n");
-      BASS_Free ();
-      return 0;
+      printf ("h2play> ");
+      scanf ("%d", &trknum);
+      if (trknum == 0)
+	{
+	  printf ("Terminating\n");
+	  BASS_Free ();
+	  return 0;
+	}
+      if (BASS_ChannelIsActive (chan))
+	{
+	  // fadeout and stop required
+	  printf ("Fading out, stopping...\n");
+	  BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
+	  while (BASS_ChannelIsSliding (chan, 0))
+	    usleep (100);
+	  BASS_ChannelStop (chan);
+	}
+      sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
+      printf ("Playing track %s\n", trkbuf);
+
+      chan = BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
+      BASS_ChannelPlay (chan, FALSE);
     }
-    sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
-    printf ("Playing track %s\n", trkbuf);
-  
-    chan = BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
-    BASS_ChannelPlay (chan, FALSE);
-  }
 }

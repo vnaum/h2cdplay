@@ -1,7 +1,7 @@
 BASSPATH = C:\20100502\bass24\c
 BASSLIB = $(BASSPATH)/bass.lib
 OUTDIR = .
-FLAGS = -Os -I$(BASSPATH)
+FLAGS = -Wall -s -Os -I$(BASSPATH)
 
 CC = gcc
 RM = rm
