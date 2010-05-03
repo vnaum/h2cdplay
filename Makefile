@@ -5,14 +5,13 @@ FLAGS = -Wall -s -Os -I$(BASSPATH)
 
 CC = gcc
 RM = rm
-RES = windres
 
 %.exe: %.c
 	$(CC) $(FLAGS) $*.c $(BASSLIB) $(LIBS) -o $(OUTDIR)/$@
 
 .PHONY: all clean
 
-TARGET = h2cdplay.exe
+TARGET = h2cdplay.exe h2cdplay_cli.exe
 
 all: $(TARGET)
 

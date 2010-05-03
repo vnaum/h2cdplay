@@ -1,7 +1,6 @@
 /*
-        BASS simple console player
-        Copyright (c) 1999-2008 Un4seen Developments Ltd.
-*/
+ * Basic HOMM2 player
+ */
 
 #include <stdio.h>
 #include <unistd.h>
