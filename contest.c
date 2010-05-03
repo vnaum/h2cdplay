@@ -47,6 +47,8 @@ main (int argc, char **argv)
 	  BASS_Free ();
 	  return 0;
 	}
+      
+      // stop the track that is been playing
       if (BASS_ChannelIsActive (chan))
 	{
 	  // fadeout and stop required
@@ -56,10 +58,15 @@ main (int argc, char **argv)
 	    usleep (100);
 	  BASS_ChannelStop (chan);
 	}
-      sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
-      printf ("Playing track %s\n", trkbuf);
+      
+      // start playback if valid trk num is given (-1 will just fade out current track)
+      if (trknum > 0)
+      {
+        sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
+        printf ("Playing track %s\n", trkbuf);
 
-      chan = BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
-      BASS_ChannelPlay (chan, FALSE);
+        chan = BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
+        BASS_ChannelPlay (chan, FALSE);
+      }
     }
 }
