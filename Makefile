@@ -1,4 +1,4 @@
-BASSPATH = C:\20100502\bass24\c
+BASSPATH = C:\bass24\c
 BASSLIB = $(BASSPATH)/bass.lib
 OUTDIR = .
 FLAGS = -Wall -s -Os -I$(BASSPATH)
@@ -12,7 +12,7 @@ RES = windres
 
 .PHONY: all clean
 
-TARGET = contest.exe
+TARGET = h2cdplay.exe
 
 all: $(TARGET)
 
