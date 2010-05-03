@@ -7,33 +7,7 @@
 #include <stdio.h>
 #include "bass.h"
 
-#ifdef _WIN32 // Windows
-#include <conio.h>
-#else // OSX
-#include <sys/time.h>
-#include <termios.h>
-#include <string.h>
-#include <unistd.h>
-
-#define Sleep(x) usleep(x*1000)
-
-int _kbhit()
-{
-        int r;
-        fd_set rfds;
-        struct timeval tv={0};
-        struct termios term,oterm;
-        tcgetattr(0,&oterm);
-        memcpy(&term,&oterm,sizeof(term));
-        cfmakeraw(&term);
-        tcsetattr(0,TCSANOW,&term);
-        FD_ZERO(&rfds);
-        FD_SET(0,&rfds);
-        r=select(1,&rfds,NULL,NULL,&tv);
-        tcsetattr(0,TCSANOW,&oterm);
-        return r;
-}
-#endif
+// #include <conio.h>
 
 // display error messages
 void Error(const char *text) 
@@ -75,19 +49,11 @@ int main(int argc, char **argv)
                 if (BASS_StreamGetFilePosition(chan,BASS_FILEPOS_DOWNLOAD)!=-1) {
                         // streaming from the internet
                         if (pos!=-1)
-#ifdef _WIN32
                                 printf("streaming internet file [%I64u bytes]",pos);
-#else
-                                printf("streaming internet file [%llu bytes]",pos);
-#endif
                         else
                                 printf("streaming internet file");
                 } else
-#ifdef _WIN32
                         printf("streaming file [%I64u bytes]",pos);
-#else
-                        printf("streaming file [%llu bytes]",pos);
-#endif
                 ismod=FALSE;
         } else {
                 // try loading the MOD (with looping, sensitive ramping, and calculate the duration)
@@ -113,28 +79,12 @@ int main(int argc, char **argv)
 
         BASS_ChannelPlay(chan,FALSE);
 
-        while (!_kbhit() && (act=BASS_ChannelIsActive(chan))) {
+        while ((act=BASS_ChannelIsActive(chan))) {
                 // display some stuff and wait a bit
                 level=BASS_ChannelGetLevel(chan);
                 pos=BASS_ChannelGetPosition(chan,BASS_POS_BYTE);
                 time=BASS_ChannelBytes2Seconds(chan,pos);
-#ifdef _WIN32
                 printf("pos %09I64u",pos);
-#else
-                printf("pos %09llu",pos);
-#endif
-                if (ismod) {
-                        pos=BASS_ChannelGetPosition(chan,BASS_POS_MUSIC_ORDER);
-                        printf(" (%03u:%03u)",LOWORD(pos),HIWORD(pos));
-                }
-                printf(" - %u:%02u - L ",time/60,time%60);
-                if (act==BASS_ACTIVE_STALLED) { // playback has stalled
-                        printf("-- buffering : %05u --", BASS_StreamGetFilePosition(chan,BASS_FILEPOS_BUFFER));
-                } else {
-                        for (a=27204;a>200;a=a*2/3) putchar(LOWORD(level)>=a?'*':'-');
-                        putchar(' ');
-                        for (a=210;a<32768;a=a*3/2) putchar(HIWORD(level)>=a?'*':'-');
-                }
                 printf(" R - cpu %.2f%%  \r",BASS_GetCPU());
                 fflush(stdout);
                 Sleep(50);
