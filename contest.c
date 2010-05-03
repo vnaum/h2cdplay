@@ -20,11 +20,13 @@ int
 main (int argc, char **argv)
 {
   DWORD chan, act, time, level;
+  int trknum = 0;
   QWORD pos;
   int a;
+  char *trkpath = "W:/h2gold_mp3";
+  char trkbuf[1024];
 
-  printf ("Simple console mode BASS example : MOD/MPx/OGG/WAV player\n"
-	  "---------------------------------------------------------\n");
+  printf ("HOMM2 CD music player\n");
 
   // check the correct BASS was loaded
   if (HIWORD (BASS_GetVersion ()) != BASSVERSION)
@@ -33,58 +35,24 @@ main (int argc, char **argv)
       return;
     }
 
-  if (argc != 2)
-    {
-      printf ("\tusage: contest <file>\n");
-      return;
-    }
-
   // setup output - default device
   if (!BASS_Init (-1, 44100, 0, 0, NULL))
     Error ("Can't initialize device");
 
-  // try streaming the file/url
-  chan = BASS_StreamCreateFile (FALSE, argv[1], 0, 0, BASS_SAMPLE_LOOP);
-  if (chan)
+  while (1)
+  {
+    printf("h2play> ");
+    scanf("%d", &trknum);
+    if (trknum == 0)
     {
-      pos = BASS_ChannelGetLength (chan, BASS_POS_BYTE);
-      printf ("streaming file [%I64u bytes]", pos);
+      printf ("Terminating\n");
+      BASS_Free ();
+      return 0;
     }
-
-  // display the time length
-  if (pos != -1)
-    {
-      time = (DWORD) BASS_ChannelBytes2Seconds (chan, pos);
-      printf (" %u:%02u\n", time / 60, time % 60);
-    }
-  else				// no time length available
-    printf ("\n");
-
-  BASS_ChannelPlay (chan, FALSE);
-
-  while ((act = BASS_ChannelIsActive (chan)))
-    {
-      // display some stuff and wait a bit
-      level = BASS_ChannelGetLevel (chan);
-      pos = BASS_ChannelGetPosition (chan, BASS_POS_BYTE);
-      time = BASS_ChannelBytes2Seconds (chan, pos);
-      printf ("pos %09I64u", pos);
-      printf (" R - cpu %.2f%%  \r", BASS_GetCPU ());
-      fflush (stdout);
-      Sleep (50);
-    }
-  printf
-    ("                                                                             \r");
-
-  // wind the frequency down...
-  BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_FREQ, 1000, 500);
-  Sleep (300);
-  // ...and fade-out to avoid a "click"
-  BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
-  // wait for slide to finish
-  while (BASS_ChannelIsSliding (chan, 0))
-    Sleep (1);
-
-  BASS_Free ();
-  return 0;
+    sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
+    printf ("Playing track %s\n", trkbuf);
+  
+    chan = BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
+    BASS_ChannelPlay (chan, FALSE);
+  }
 }
