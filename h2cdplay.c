@@ -54,6 +54,7 @@ main (int argc, char **argv)
   int i;
   char *trkpath = "./tracks";
   char trkbuf[1024];
+  float volume = 1.0;
 
   printf ("HOMM2 CD music player\n");
 
@@ -85,6 +86,7 @@ main (int argc, char **argv)
       printf ("Event fired: %ld\n", dwWaitResult);
       trknum = dwWaitResult;
 
+      // process stop/terminate events:
       if (trknum == 0)
 	{
 	  StopChan (chan);
@@ -98,12 +100,12 @@ main (int argc, char **argv)
 	  return 0;
 	}
 
-      // start playback if valid trk num is given
+      // process playback events:
       if (trknum >= 2 && trknum <= 49)
 	{
 	  StopChan (chan);
 	  sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
-	  printf ("Playing track %s\n", trkbuf);
+	  printf ("Playing track %s, volume = %.2f\n", trkbuf, volume);
 
 	  chan =
 	    BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
@@ -117,33 +119,24 @@ main (int argc, char **argv)
 	  // free stream once playback ends
 	  BASS_ChannelFlags (chan, BASS_STREAM_AUTOFREE,
 			     BASS_STREAM_AUTOFREE | BASS_SAMPLE_LOOP);
-
+          // and volume:
+          BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
 	  BASS_ChannelPlay (chan, FALSE);
+          continue;
 	}
 
       // process volume events
       if (trknum >= 50 && trknum <= 60)
 	{
 	  int vol_req = trknum - 50;
-	  float vol_fin = 0.0;
 	  int tvar = 11 - vol_req;
-	  /*
-	   * on -- 1
-	   * 9 -- 2
-	   * 8 -- 3
-	   * 3 -- 8
-	   * 2 -- 9
-	   * 1 -- 10
-	   * off - 0
-	   * */
-
 	  if (tvar > 10)
 	    tvar = 0;
-	  vol_fin = 0.1 * tvar;
-	  printf ("Volume requested: %d, final: %.2f\n", vol_req, vol_fin);
+	  volume = 0.1 * tvar;
+	  printf ("Volume requested: %d, final: %.2f\n", vol_req, volume);
 
 	  if (BASS_ChannelIsActive (chan))
-	    BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, vol_fin);
+	    BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
 	  continue;
 	}
     }
