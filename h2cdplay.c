@@ -41,7 +41,7 @@ StopChan (DWORD chan)
       printf ("Stopping playback...\n");
       BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
       while (BASS_ChannelIsSliding (chan, 0))
-	usleep (100);
+        usleep (100);
       BASS_ChannelStop (chan);
     }
 }
@@ -78,66 +78,66 @@ main (int argc, char **argv)
   printf ("Waiting for events...\n");
   while (1)
     {
-      DWORD dwWaitResult = WaitForMultipleObjects (MAXTRACK,	// number of handles in array
-						   evt,	// array of thread handles
-						   FALSE,	// wait until all are signaled
-						   INFINITE);
+      DWORD dwWaitResult = WaitForMultipleObjects (MAXTRACK,    // number of handles in array
+                                                   evt, // array of thread handles
+                                                   FALSE,       // wait until all are signaled
+                                                   INFINITE);
 
       printf ("Event fired: %ld\n", dwWaitResult);
       trknum = dwWaitResult;
 
       // process stop/terminate events:
       if (trknum == 0)
-	{
-	  StopChan (chan);
-	  continue;
-	}
+        {
+          StopChan (chan);
+          continue;
+        }
 
       if (trknum == 1)
-	{
-	  printf ("Terminating\n");
-	  BASS_Free ();
-	  return 0;
-	}
+        {
+          printf ("Terminating\n");
+          BASS_Free ();
+          return 0;
+        }
 
       // process playback events:
       if (trknum >= 2 && trknum <= 49)
-	{
-	  StopChan (chan);
-	  sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
-	  printf ("Playing track %s, volume = %.2f\n", trkbuf, volume);
+        {
+          StopChan (chan);
+          sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
+          printf ("Playing track %s, volume = %.2f\n", trkbuf, volume);
 
-	  chan =
-	    BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
-	  if (!chan)
-	    {
-	      printf ("Error while opening\n");
-	      continue;
-	    }
+          chan =
+            BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
+          if (!chan)
+            {
+              printf ("Error while opening\n");
+              continue;
+            }
 
-	  // set some flags:
-	  // free stream once playback ends
-	  BASS_ChannelFlags (chan, BASS_STREAM_AUTOFREE,
-			     BASS_STREAM_AUTOFREE | BASS_SAMPLE_LOOP);
-	  // and volume:
-	  BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
-	  BASS_ChannelPlay (chan, FALSE);
-	  continue;
-	}
+          // set some flags:
+          // free stream once playback ends
+          BASS_ChannelFlags (chan, BASS_STREAM_AUTOFREE,
+                             BASS_STREAM_AUTOFREE | BASS_SAMPLE_LOOP);
+          // and volume:
+          BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          BASS_ChannelPlay (chan, FALSE);
+          continue;
+        }
 
       // process volume events
       if (trknum >= 50 && trknum <= 60)
-	{
-	  int vol_req = trknum - 50;
-	  int tvar = 11 - vol_req;
-	  if (tvar > 10)
-	    tvar = 0;
-	  volume = 0.1 * tvar;
-	  printf ("Volume requested: %d, final: %.2f\n", vol_req, volume);
+        {
+          int vol_req = trknum - 50;
+          int tvar = 11 - vol_req;
+          if (tvar > 10)
+            tvar = 0;
+          volume = 0.1 * tvar;
+          printf ("Volume requested: %d, final: %.2f\n", vol_req, volume);
 
-	  if (BASS_ChannelIsActive (chan))
-	    BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
-	  continue;
-	}
+          if (BASS_ChannelIsActive (chan))
+            BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          continue;
+        }
     }
 }

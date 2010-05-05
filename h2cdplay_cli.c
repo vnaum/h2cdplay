@@ -43,9 +43,9 @@ main (int argc, char **argv)
       fire_event (trknum);
 
       if (trknum == 1)
-	{
-	  printf ("Terminating\n");
-	  return 0;
-	}
+        {
+          printf ("Terminating\n");
+          return 0;
+        }
     }
 }
