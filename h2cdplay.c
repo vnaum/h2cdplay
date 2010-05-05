@@ -122,10 +122,32 @@ main (int argc, char **argv)
       }
       
       // process volume events
-      if (trknum >=50 && trknum <= 59)
+      if (trknum >=50 && trknum <= 60)
       {
-          printf ("Volume (not yet implemented): %d\n", trknum - 50);
-          continue;
+        int vol_req = trknum - 50;
+        float vol_fin = 0.0;
+        int tvar = 11 - vol_req;
+        /*
+         * on -- 1
+         * 9 -- 2
+         * 8 -- 3
+         * 3 -- 8
+         * 2 -- 9
+         * 1 -- 10
+         * off - 0
+         * */
+
+        if (tvar > 10)
+          tvar = 0;
+        vol_fin = 0.1 * tvar;
+        printf ("Volume requested: %d, final: %.2f\n", vol_req, vol_fin);
+        
+        BASS_ChannelSetAttribute(
+            chan,
+            BASS_ATTRIB_VOL,
+            vol_fin
+            );
+        continue;
       }
     }
 }
