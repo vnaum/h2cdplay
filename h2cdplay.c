@@ -30,11 +30,28 @@ Error (const char *text)
   exit (0);
 }
 
+// display error messages
+void
+StopChan (DWORD chan)
+{
+  // stop the track that is been playing
+  if (BASS_ChannelIsActive (chan))
+    {
+      // fadeout and stop required
+      printf ("Stopping playback...\n");
+      BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
+      while (BASS_ChannelIsSliding (chan, 0))
+        usleep (100);
+      BASS_ChannelStop (chan);
+    }
+}
+
 int
 main (int argc, char **argv)
 {
   DWORD chan = 0;
   int trknum = 0;
+  int i;
   char *trkpath = "./tracks";
   char trkbuf[1024];
 
@@ -51,6 +68,10 @@ main (int argc, char **argv)
   if (!BASS_Init (-1, 44100, 0, 0, NULL))
     Error ("Can't initialize device");
   create_events();
+  
+  // Reset all pending events:
+  for (i = 0; i < MAXTRACK; i++)
+    ResetEvent(evt[i]);
 
   printf ("Will play tracks from '%s' on events\n", trkpath);
   printf ("Waiting for events...\n");
@@ -65,6 +86,12 @@ main (int argc, char **argv)
       printf ("Event fired: %ld\n", dwWaitResult);
       trknum = dwWaitResult;
       
+      if (trknum == 0)
+	{
+          StopChan (chan);
+          continue;
+	}
+
       if (trknum == 1)
 	{
 	  printf ("Terminating\n");
@@ -72,20 +99,10 @@ main (int argc, char **argv)
 	  return 0;
 	}
       
-      // stop the track that is been playing
-      if (BASS_ChannelIsActive (chan))
-	{
-	  // fadeout and stop required
-	  printf ("Stopping playback...\n");
-	  BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
-	  while (BASS_ChannelIsSliding (chan, 0))
-	    usleep (100);
-	  BASS_ChannelStop (chan);
-	}
-      
       // start playback if valid trk num is given
       if (trknum >=2 && trknum <= 49)
       {
+        StopChan (chan);
         sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
         printf ("Playing track %s\n", trkbuf);
 
