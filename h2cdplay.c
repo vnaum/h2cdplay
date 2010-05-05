@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "bass.h"
 
-#define MAXTRACK 50
+#define MAXTRACK 64
 HANDLE evt[MAXTRACK];
 
 void
@@ -35,7 +35,7 @@ main (int argc, char **argv)
 {
   DWORD chan = 0;
   int trknum = 0;
-  char *trkpath = "W:/h2gold_mp3";
+  char *trkpath = "./tracks";
   char trkbuf[1024];
 
   printf ("HOMM2 CD music player\n");
@@ -52,6 +52,7 @@ main (int argc, char **argv)
     Error ("Can't initialize device");
   create_events();
 
+  printf ("Will play tracks from '%s' on events\n", trkpath);
   printf ("Waiting for events...\n");
   while (1)
     {
@@ -64,7 +65,7 @@ main (int argc, char **argv)
       printf ("Event fired: %ld\n", dwWaitResult);
       trknum = dwWaitResult;
       
-      if (trknum == 0)
+      if (trknum == 1)
 	{
 	  printf ("Terminating\n");
 	  BASS_Free ();
@@ -82,8 +83,8 @@ main (int argc, char **argv)
 	  BASS_ChannelStop (chan);
 	}
       
-      // start playback if valid trk num is given (-1 will just fade out current track)
-      if (trknum > 0)
+      // start playback if valid trk num is given
+      if (trknum >=2 && trknum <= 49)
       {
         sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
         printf ("Playing track %s\n", trkbuf);
@@ -101,6 +102,13 @@ main (int argc, char **argv)
             BASS_STREAM_AUTOFREE|BASS_SAMPLE_LOOP);
         
         BASS_ChannelPlay (chan, FALSE);
+      }
+      
+      // process volume events
+      if (trknum >=50 && trknum <= 59)
+      {
+          printf ("Volume (not yet implemented): %d\n", trknum - 50);
+          continue;
       }
     }
 }

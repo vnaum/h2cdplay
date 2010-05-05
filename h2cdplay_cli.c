@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 
-#define MAXTRACK 50
+#define MAXTRACK 64
 HANDLE evt[MAXTRACK];
 
 void
@@ -26,13 +26,11 @@ fire_event (int trknum)
     }
 }
 
-
-
 int
 main (int argc, char **argv)
 {
   int trknum = 0;
-  printf ("HOMM2 CD music player\nEnter track number to play, 0 to exit\n");
+  printf ("HOMM2 CD music player\nEnter track number to play, 0 to stop playback, 1 to exit\n");
 
   create_events ();
   while (1)
@@ -40,10 +38,10 @@ main (int argc, char **argv)
       printf ("h2play> ");
       scanf ("%d", &trknum);
 
-      printf ("setting %d\n", trknum);
+      printf ("Event: %d\n", trknum);
       fire_event (trknum);
       
-      if (trknum == 0)
+      if (trknum == 1)
         {
           printf ("Terminating\n");
           return 0;
