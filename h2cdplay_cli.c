@@ -30,7 +30,8 @@ int
 main (int argc, char **argv)
 {
   int trknum = 0;
-  printf ("HOMM2 CD music player\nEnter track number to play, 0 to stop playback, 1 to exit\n");
+  printf
+    ("HOMM2 CD music player\nEnter track number to play, 0 to stop playback, 1 to exit\n");
 
   create_events ();
   while (1)
@@ -40,11 +41,11 @@ main (int argc, char **argv)
 
       printf ("Event: %d\n", trknum);
       fire_event (trknum);
-      
+
       if (trknum == 1)
-        {
-          printf ("Terminating\n");
-          return 0;
-        }
+	{
+	  printf ("Terminating\n");
+	  return 0;
+	}
     }
 }

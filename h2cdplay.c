@@ -119,10 +119,10 @@ main (int argc, char **argv)
 	  // free stream once playback ends
 	  BASS_ChannelFlags (chan, BASS_STREAM_AUTOFREE,
 			     BASS_STREAM_AUTOFREE | BASS_SAMPLE_LOOP);
-          // and volume:
-          BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+	  // and volume:
+	  BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
 	  BASS_ChannelPlay (chan, FALSE);
-          continue;
+	  continue;
 	}
 
       // process volume events
