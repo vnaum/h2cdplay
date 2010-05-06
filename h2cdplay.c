@@ -3,11 +3,29 @@
  */
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <unistd.h>
+#include <time.h>
 #include "bass.h"
 
 #define MAXTRACK 64
 HANDLE evt[MAXTRACK];
+
+int log_str(const char *format, ...)
+{
+  char timebuf[100];
+  va_list ap;
+  struct tm *tmp;
+  time_t t;
+
+  t = time(NULL);
+  tmp = localtime(&t);
+  strftime(timebuf, sizeof(timebuf), "%H:%M:%S", tmp);
+  printf("[%s] ", timebuf);
+
+  va_start(ap, format);
+  return vprintf(format, ap);
+}
 
 void
 create_events ()
@@ -25,7 +43,7 @@ create_events ()
 void
 Error (const char *text)
 {
-  printf ("Error(%d): %s\n", BASS_ErrorGetCode (), text);
+  log_str ("Error(%d): %s\n", BASS_ErrorGetCode (), text);
   BASS_Free ();
   exit (0);
 }
@@ -38,7 +56,7 @@ StopChan (DWORD chan)
   if (BASS_ChannelIsActive (chan))
     {
       // fadeout and stop required
-      printf ("Stopping playback...\n");
+      log_str ("Stopping playback...\n");
       BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
       while (BASS_ChannelIsSliding (chan, 0))
         usleep (100);
@@ -83,7 +101,7 @@ main (int argc, char **argv)
                                                    FALSE,       // wait until all are signaled
                                                    INFINITE);
 
-      printf ("Event fired: %ld\n", dwWaitResult);
+      log_str ("Event fired: %ld\n", dwWaitResult);
       trknum = dwWaitResult;
 
       // process stop/terminate events:
@@ -95,7 +113,7 @@ main (int argc, char **argv)
 
       if (trknum == 1)
         {
-          printf ("Terminating\n");
+          log_str ("Terminating\n");
           BASS_Free ();
           return 0;
         }
@@ -105,13 +123,13 @@ main (int argc, char **argv)
         {
           StopChan (chan);
           sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
-          printf ("Playing track %s, volume = %.2f\n", trkbuf, volume);
+          log_str ("Playing track %s, volume = %.2f\n", trkbuf, volume);
 
           chan =
             BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
           if (!chan)
             {
-              printf ("Error while opening\n");
+              log_str ("Error while opening\n");
               continue;
             }
 
@@ -133,7 +151,7 @@ main (int argc, char **argv)
           if (tvar > 10)
             tvar = 0;
           volume = 0.1 * tvar;
-          printf ("Volume requested: %d, final: %.2f\n", vol_req, volume);
+          log_str ("Volume requested: %d, final: %.2f\n", vol_req, volume);
 
           if (BASS_ChannelIsActive (chan))
             BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
