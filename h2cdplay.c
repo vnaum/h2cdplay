@@ -69,9 +69,12 @@ main (int argc, char **argv)
 {
   DWORD chan = 0;
   int trknum = 0;
+  int now_playing = 0;
   int i;
   char *trkpath = "./tracks";
   char trkbuf[1024];
+  int *t_savepos;  // "save position" flag
+  QWORD *t_position; // saved position
   float volume = 1.0;
 
   printf ("HOMM2 CD music player\n");
@@ -88,6 +91,10 @@ main (int argc, char **argv)
     Error ("Can't initialize device");
   create_events ();
 
+  // initialize t_savepos / t_position, set to zero
+  t_savepos  = calloc(MAXTRACK, sizeof(t_savepos[0]));
+  t_position = calloc(MAXTRACK, sizeof(t_position[0]));
+
   // Reset all pending events:
   for (i = 0; i < MAXTRACK; i++)
     ResetEvent (evt[i]);
@@ -96,10 +103,7 @@ main (int argc, char **argv)
   printf ("Waiting for events...\n");
   while (1)
     {
-      DWORD dwWaitResult = WaitForMultipleObjects (MAXTRACK,    // number of handles in array
-                                                   evt, // array of thread handles
-                                                   FALSE,       // wait until all are signaled
-                                                   INFINITE);
+      DWORD dwWaitResult = WaitForMultipleObjects (MAXTRACK, evt, FALSE, INFINITE);
 
       log_str ("Event fired: %ld\n", dwWaitResult);
       trknum = dwWaitResult;
@@ -121,9 +125,22 @@ main (int argc, char **argv)
       // process playback events:
       if (trknum >= 2 && trknum <= 49)
         {
+          
+          if(t_savepos[now_playing])
+          {
+            t_position[now_playing] = BASS_ChannelGetPosition(chan, BASS_POS_BYTE);
+            log_str ("Saved position for track #%02d (%08ld)\n", now_playing, t_position[now_playing]);
+          }
+
           StopChan (chan);
+          
+          now_playing = trknum;
+          
           sprintf (trkbuf, "%s/track%02d.mp3", trkpath, trknum);
-          log_str ("Playing track %s, volume = %.2f\n", trkbuf, volume);
+          if (t_savepos[now_playing])
+            log_str ("Playing track %s, volume = %.2f (saved position = %08ld)\n", trkbuf, volume, t_position[now_playing]);
+          else
+            log_str ("Playing track %s, volume = %.2f\n", trkbuf, volume);
 
           chan =
             BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
@@ -155,6 +172,13 @@ main (int argc, char **argv)
 
           if (BASS_ChannelIsActive (chan))
             BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          continue;
+        }
+      
+      if (trknum == 61)
+        {
+          log_str ("Setting 'save position' flag for track %d\n", now_playing);
+          t_savepos[now_playing] = 1;
           continue;
         }
     }
