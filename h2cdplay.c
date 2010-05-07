@@ -179,6 +179,8 @@ main (int argc, char **argv)
 
           // set volume:
           BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          // set looping (that's okay, we checked for length):
+          BASS_ChannelFlags (chan, BASS_SAMPLE_LOOP, BASS_SAMPLE_LOOP);
           // seek to start:
           if (t_savepos[now_playing] && t_position[now_playing] > 0)
             {
