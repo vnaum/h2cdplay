@@ -143,19 +143,22 @@ main (int argc, char **argv)
             log_str ("Playing track %s, volume = %.2f\n", trkbuf, volume);
 
           chan =
-            BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_SAMPLE_LOOP);
+            BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_STREAM_AUTOFREE);
           if (!chan)
             {
               log_str ("Error while opening\n");
               continue;
             }
 
-          // set some flags:
-          // free stream once playback ends
-          BASS_ChannelFlags (chan, BASS_STREAM_AUTOFREE,
-                             BASS_STREAM_AUTOFREE | BASS_SAMPLE_LOOP);
-          // and volume:
+          // set volume:
           BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          // seek to start:
+          if (t_savepos[now_playing] && t_position[now_playing] > 0)
+          {
+            if ( ! BASS_ChannelSetPosition(chan, t_position[now_playing], BASS_POS_BYTE))
+              Error("Seek failed");
+          }
+          
           BASS_ChannelPlay (chan, FALSE);
           continue;
         }
