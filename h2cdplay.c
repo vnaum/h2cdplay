@@ -11,6 +11,11 @@
 #define MAXTRACK 64
 HANDLE evt[MAXTRACK];
 
+char *trkpath = "./tracks";
+int now_playing = 0;
+int *t_savepos;               // "save position" flag
+QWORD *t_position;            // saved position
+
 int
 log_str (const char *format, ...)
 {
@@ -46,37 +51,41 @@ Error (const char *text)
 {
   log_str ("Error(%d): %s\n", BASS_ErrorGetCode (), text);
   BASS_Free ();
-  exit (0);
+  exit (1);
 }
 
-// display error messages
+// save position, stop playback
 void
 StopChan (DWORD chan)
 {
   // stop the track that is been playing
-  if (BASS_ChannelIsActive (chan))
-    {
-      // fadeout and stop required
-      log_str ("Stopping playback...\n");
-      BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
-      while (BASS_ChannelIsSliding (chan, 0))
-        usleep (100);
-      BASS_ChannelStop (chan);
-    }
+  if (!BASS_ChannelIsActive (chan))
+    return;
+  
+  if (t_savepos[now_playing])
+  {
+    t_position[now_playing] =
+      BASS_ChannelGetPosition (chan, BASS_POS_BYTE);
+    log_str ("Saved position for track #%02d (%08ld bytes)\n",
+             now_playing, t_position[now_playing]);
+  }
+  // fadeout and stop
+  log_str ("Stopping %02d playback...\n", now_playing);
+  BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, -1, 200);
+  while (BASS_ChannelIsSliding (chan, 0))
+    usleep (100);
+  BASS_ChannelStop (chan);
+  now_playing = 0;
 }
 
 int
 main (int argc, char **argv)
 {
   DWORD chan = 0;
-  int trknum = 0;
-  int now_playing = 0;
   int i;
-  char *trkpath = "./tracks";
-  char trkbuf[1024];
-  int *t_savepos;               // "save position" flag
-  QWORD *t_position;            // saved position
+  int trknum = 0;
   float volume = 1.0;
+  char trkbuf[1024];
 
   printf ("HOMM2 CD music player\n");
 
@@ -100,8 +109,8 @@ main (int argc, char **argv)
   for (i = 0; i < MAXTRACK; i++)
     ResetEvent (evt[i]);
 
-  printf ("Will play tracks from '%s' on events\n", trkpath);
-  printf ("Waiting for events...\n");
+  log_str ("Will play tracks from '%s'\n", trkpath);
+  log_str ("Waiting for events...\n");
   while (1)
     {
       DWORD dwWaitResult =
@@ -150,21 +159,13 @@ main (int argc, char **argv)
           if (next_len <= 10)
             {
               log_str
-                ("%s is a jingle (%d sec), playing in background\n",
-                 trkbuf, next_len);
+                ("Track #%02d is a jingle (%d sec), playing in background\n",
+                 trknum, next_len);
               BASS_ChannelPlay (next, FALSE);
               continue;
             }
 
           // okay, it's not a jingle. do full-fledged processing (stop, restore, etc).
-          if (t_savepos[now_playing])
-            {
-              t_position[now_playing] =
-                BASS_ChannelGetPosition (chan, BASS_POS_BYTE);
-              log_str ("Saved position for track #%02d (%08ld)\n",
-                       now_playing, t_position[now_playing]);
-            }
-
           StopChan (chan);
           chan = next;
           now_playing = trknum;
@@ -186,7 +187,7 @@ main (int argc, char **argv)
             {
               if (!BASS_ChannelSetPosition
                   (chan, t_position[now_playing], BASS_POS_BYTE))
-                Error ("Seek failed");
+                log_str ("Seek failed");
             }
 
           BASS_ChannelPlay (chan, FALSE);
