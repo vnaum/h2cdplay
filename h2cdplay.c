@@ -2,6 +2,7 @@
  * Basic HOMM2 player
  */
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
