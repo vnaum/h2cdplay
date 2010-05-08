@@ -170,25 +170,33 @@ main (int argc, char **argv)
           chan = next;
           now_playing = trknum;
 
-          if (t_savepos[now_playing])
-            log_str
-              ("Playing track %s, volume = %.2f (saved position = %08ld)\n",
-               trkbuf, volume, t_position[now_playing]);
-          else
-            log_str ("Playing track %s, volume = %.2f\n", trkbuf, volume);
-
-
-          // set volume:
-          BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          
           // set looping (that's okay, we checked for length):
           BASS_ChannelFlags (chan, BASS_SAMPLE_LOOP, BASS_SAMPLE_LOOP);
+          
+          // set volume:
+          BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, volume);
+          
           // seek to start:
           if (t_savepos[now_playing] && t_position[now_playing] > 0)
             {
+              log_str
+                ("Playing track %s, volume = %.2f (saved position = %08ld)\n",
+                 trkbuf, volume, t_position[now_playing]);
               if (!BASS_ChannelSetPosition
                   (chan, t_position[now_playing], BASS_POS_BYTE))
                 log_str ("Seek failed");
+              else
+              {
+                // we're starting from the middle of track, do fade-in:
+                BASS_ChannelSetAttribute (chan, BASS_ATTRIB_VOL, 0.0);
+                BASS_ChannelSlideAttribute (chan, BASS_ATTRIB_VOL, volume, 2000);
+              }
             }
+          else
+          {
+            log_str ("Playing track %s, volume = %.2f\n", trkbuf, volume);
+          }
 
           BASS_ChannelPlay (chan, FALSE);
           continue;
