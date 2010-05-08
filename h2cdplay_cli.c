@@ -21,7 +21,7 @@ fire_event (int trknum)
 {
   if (!SetEvent (evt[trknum]))
     {
-      printf ("SetEvent failed (%ld)\n", GetLastError ());
+      printf ("SetEvent failed (%ld)\n", (long int)GetLastError ());
       return;
     }
 }
