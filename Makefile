@@ -1,13 +1,12 @@
-BASSPATH = C:\bass24\c
-BASSLIB = $(BASSPATH)/bass.lib
+BASSPATH = $(HOME)/build/bass
 OUTDIR = .
-FLAGS = -Wall -s -Os -I$(BASSPATH)
+FLAGS = -Wall -s -Os -I$(BASSPATH) -L$(BASSPATH) -lbass -Wl,-rpath,$(BASSPATH)
 
 CC = gcc
 RM = rm
 
 %.exe: %.c
-	$(CC) $(FLAGS) $*.c $(BASSLIB) $(LIBS) -o $(OUTDIR)/$@
+	$(CC) $(FLAGS) $*.c -o $(OUTDIR)/$@
 
 .PHONY: all clean
 
