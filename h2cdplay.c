@@ -136,6 +136,12 @@ main (int argc, char **argv)
       // process playback events:
       if (trknum >= 2 && trknum <= 49)
         {
+          if (trknum == now_playing)
+          {
+            log_str ("%02d is requested, and it's now playing\n", trknum);
+            continue;
+          }
+
           // preload next chan
           DWORD next = 0;
           int next_len = -1;
