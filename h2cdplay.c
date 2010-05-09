@@ -152,7 +152,7 @@ main (int argc, char **argv)
             BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_STREAM_AUTOFREE);
           if (!next)
             {
-              log_str ("Error while opening\n");
+              log_str ("Error while opening track #%d\n", trknum);
               continue;
             }
 
