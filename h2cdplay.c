@@ -127,7 +127,7 @@ main (int argc, char **argv)
           continue;
         }
 
-      if (trknum == 1)
+      if (trknum == 63)
         {
           log_str ("Terminating\n");
           BASS_Free ();
@@ -135,7 +135,7 @@ main (int argc, char **argv)
         }
 
       // process playback events:
-      if (trknum >= 2 && trknum <= 49)
+      if (trknum >= 1 && trknum <= 49)
         {
           if (trknum == now_playing)
           {

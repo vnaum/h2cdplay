@@ -16,7 +16,7 @@ number to fire the event).
 Protocol description:
 Events are created with text names like "h2cd_play_track#%02d"
 Event 0: stop playback
-Event 1: terminate server
-Events 2..49: play given track
+Events 1..49: play given track
 Events 50..60: set playback volume (in a rather convoluted way)
 Event 61: set "save/restore" posiion flag for this track (playback will be continued from saved position)
+Event 63: terminate server
