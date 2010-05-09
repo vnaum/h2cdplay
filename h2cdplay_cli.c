@@ -21,7 +21,7 @@ fire_event (int trknum)
 {
   if (!SetEvent (evt[trknum]))
     {
-      printf ("SetEvent failed (%ld)\n", GetLastError ());
+      printf ("SetEvent failed (%ld)\n", (long int)GetLastError ());
       return;
     }
 }
@@ -42,7 +42,7 @@ main (int argc, char **argv)
       printf ("Event: %d\n", trknum);
       fire_event (trknum);
 
-      if (trknum == 1)
+      if (trknum == 63)
         {
           printf ("Terminating\n");
           return 0;
