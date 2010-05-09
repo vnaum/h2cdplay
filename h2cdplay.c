@@ -152,7 +152,7 @@ main (int argc, char **argv)
             BASS_StreamCreateFile (FALSE, trkbuf, 0, 0, BASS_STREAM_AUTOFREE);
           if (!next)
             {
-              log_str ("Error while opening\n");
+              log_str ("Error while opening track #%d\n", trknum);
               continue;
             }
 
@@ -224,7 +224,7 @@ main (int argc, char **argv)
           continue;
         }
 
-      if (trknum == 61)
+      if (trknum == 61 && !t_savepos[now_playing])
         {
           log_str ("Setting 'save position' flag for track %d\n",
                    now_playing);

@@ -36,8 +36,13 @@ main (int argc, char **argv)
   create_events ();
   while (1)
     {
+      int ret;
       printf ("h2play> ");
-      scanf ("%d", &trknum);
+      ret = scanf ("%d", &trknum);
+      if (ret == EOF)
+        return 0;
+      if (!ret)
+        continue;
 
       printf ("Event: %d\n", trknum);
       fire_event (trknum);
