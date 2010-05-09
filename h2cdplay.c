@@ -224,7 +224,7 @@ main (int argc, char **argv)
           continue;
         }
 
-      if (trknum == 61)
+      if (trknum == 61 && !t_savepos[now_playing])
         {
           log_str ("Setting 'save position' flag for track %d\n",
                    now_playing);
