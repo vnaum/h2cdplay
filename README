@@ -8,7 +8,9 @@ you need to rip/encode original audio tracks.
 h2cdplay uses BASS audio library (http://www.un4seen.com/bass.html) to
 decode/playback tracks.
 
-h2cdplay works with WINE on linux.
+h2cdplay works with WINE on linux. You can also build more "native" binaries
+using winebuild and Linux version of BASS library. On Debian/Ubuntu systems you
+will need wine-utils and libwine-dev packages.
 
 Sample console-based client is included for testing purposes (just enter event
 number to fire the event).
