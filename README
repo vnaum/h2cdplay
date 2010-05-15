@@ -10,7 +10,9 @@ decode/playback tracks.
 
 h2cdplay works with WINE on linux. You can also build more "native" binaries
 using winebuild and Linux version of BASS library. On Debian/Ubuntu systems you
-will need wine-utils and libwine-dev packages.
+will need wine-utils and libwine-dev packages. You should also check out
+fheroes2, free heroes2 engine at sourceforge:
+http://sourceforge.net/projects/fheroes2/
 
 Sample console-based client is included for testing purposes (just enter event
 number to fire the event).
